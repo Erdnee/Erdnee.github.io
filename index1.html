@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Word asker</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        body * {
+            float: left;
+        }
+
+        .playerScore {
+            width:100%;
+            font-size:50px;
+            text-align: center;
+        }
+        .playerName {
+            font-size:50px;
+            text-align: center;
+            width:100%;
+        }
+        #controlField {
+            width: 30%;
+            height: 100vh;
+            max-height: 100vh;
+        }
+
+        #controlField button {
+            width: 30%;
+            height: 60px;
+        }
+
+        #blankSpace {
+            width: 40%;
+            height: 10vh;
+            background-color: white;
+        }
+
+        #others {
+            width: 100%;
+        }
+
+        .playerWords {
+            width: 100%;
+            font-size: 50px;
+            background-color: aquamarine;
+        }
+
+        #playerTurn {
+            width: 100%;
+            text-align: center;
+            font-size: 40px;
+        }
+
+        #display {
+            width: 100%;
+            font-size: 50px;
+            text-align: center;
+        }
+        .playerInfo{
+            width: 35%;
+            height: 100vh;
+            background-color:azure;
+            max-height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="playerInfo">
+        <div id="player1Name" class="playerName">Player1</div>
+        <div id="player1Score" class="playerScore">0</div>
+        <div id="player1Words" class="playerWords"></div>
+    </div>
+    <div id="controlField">
+        <div id="playerTurn">Player1</div>
+        <div id="others">
+            <button onclick="buttonClick()">-</button>
+            <div id="blankSpace"></div>
+            <button onclick="buttonClick()">+</button>
+        </div>
+        <div id="display">Game</div>
+
+    </div>  
+    <div class="playerInfo">
+        <div id="player1Name" class="playerName">Player2</div>
+        <div id="player2Score" class="playerScore">0</div>
+        <div id="player2Words" class="playerWords"></div>
+    </div>
+
+    <script>
+        let words
+        let p1Score = 0
+        let p2Score = 0
+        const display = document.getElementById("display")
+        const playerTurnDiv = document.getElementById("playerTurn")
+        const player1Score = document.getElementById("player1Score")
+        const player2Score = document.getElementById("player2Score")
+        let playerTurn = 1
+        function showScores() {
+            player1Score.textContent = p1Score
+            player2Score.textContent = p2Score
+        }
+        async function getCSV() {
+            const response = await fetch("./words.csv")
+            const data = await response.text()
+            const table = data.split(/\n/).slice(2)
+            let words = []
+            for (let i = 0; i < table.length; i++) {
+                words.push(table[i].split(",").slice(1, 2))
+            }
+            return words
+        }
+        function run(arg) {
+            words = arg
+            changePlayerTurn()
+            showRandomWord(arg)
+        }
+        function showRandomWord(array) {
+            const randomIndex = Math.floor(Math.random() * array.length)
+            display.textContent = array[randomIndex]
+            array.splice(randomIndex, 1)
+            return array
+        }
+        function buttonClick() {
+            let score = 0
+            if (words.length == 0) {
+                display.textContent = "We're out of words"
+            }
+            if (event.path[0].innerHTML == "-") {
+                score--
+            }
+            else if (event.path[0].innerHTML == "+") {
+                score++
+            }
+            if (playerTurn == 1) {
+                p1Score += score
+                playerTurn = 2
+            }
+            else {
+                p2Score += score
+                playerTurn = 1
+            }
+            changePlayerTurn()
+            words = showRandomWord(words)
+            showScores()
+        }
+        function changePlayerTurn() {
+            playerTurnDiv.textContent = "Player" + playerTurn + "'s turn"
+        }
+
+        getCSV().then(run)
+
+    </script>
+</body>
+
+</html>
